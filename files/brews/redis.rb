@@ -2,10 +2,10 @@ require 'formula'
 
 class Redis < Formula
   homepage 'http://redis.io/'
-  url 'http://download.redis.io/releases/redis-3.0.7.tar.gz'
-  sha256 'b2a791c4ea3bb7268795c45c6321ea5abcc24457178373e6a6e3be6372737f23'
+  url 'http://download.redis.io/releases/redis-2.8.24.tar.gz'
+  sha1 '636efa8b522dfbf7f3dba372237492c11181f8e0'
 
-  version '3.0.7-boxen1'
+  version '2.8.24-boxen1'
 
   def install
     # Architecture isn't detected correctly on 32bit Snow Leopard without help
