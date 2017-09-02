@@ -9,13 +9,15 @@ class Redis < Formula
 
   def install
     # Architecture isn't detected correctly on 32bit Snow Leopard without help
-    ENV["OBJARCH"] = MacOS.prefer_64_bit? ? "-arch x86_64" : "-arch i386"
+    ENV["OBJARCH"] = "-arch #{MacOS.preferred_arch}"
 
-    # Head and stable have different code layouts
-    src = (buildpath/'src/Makefile').exist? ? buildpath/'src' : buildpath
-    system "make", "-C", src, "CC=#{ENV.cc}"
+    args = %W[
+      PREFIX=#{prefix}
+      CC=#{ENV.cc}
+    ]
+    args << "MALLOC=jemalloc" if build.with? "jemalloc"
+    system "make", "install", *args
 
-    %w[benchmark cli server check-dump check-aof].each { |p| bin.install src/"redis-#{p}" }
     %w[run db/redis log].each { |p| (var+p).mkpath }
 
     # Fix up default conf file to match our paths
@@ -25,12 +27,7 @@ class Redis < Formula
       s.gsub! "\# bind 127.0.0.1", "bind 127.0.0.1"
     end
 
-    # Fix redis upgrade from 2.4 to 2.6.
-    if File.exists?(etc/'redis.conf') && !File.readlines(etc/'redis.conf').grep(/^vm-enabled/).empty?
-      mv etc/'redis.conf', etc/'redis.conf.old'
-      ohai "Your redis.conf will not work with 2.6; moved it to redis.conf.old"
-    end
-
-    etc.install 'redis.conf' unless (etc/'redis.conf').exist?
+    etc.install "redis.conf"
+    etc.install "sentinel.conf" => "redis-sentinel.conf"
   end
 end
